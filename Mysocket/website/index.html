@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Chat Application</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h1>Chat Application</h1>
+    <form id="join-form">
+      <input type="text" id="username-input" placeholder="Enter your username">
+      <input type="text" id="room-input" placeholder="Enter chat room name">
+      <button type="submit">Join</button>
+    </form>
+    <div id="chat-container" style="display: none;">
+      <ul id="messages"></ul>
+      <form id="message-form">
+        <input type="text" id="message-input" placeholder="Type your message">
+        <button type="submit">Send</button>
+      </form>
+    </div>
+    <script>
+      var socket = io();
+      var username = '';
+      var room = '';
+
+      // Handle form submission to join chat room
+      document.getElementById('join-form').onsubmit = function() {
+        username = document.getElementById('username-input').value;
+        room = document.getElementById('room-input').value;
+        socket.emit('join', {username: username, room: room});
+        document.getElementById('join-form').style.display = 'none';
+        document.getElementById('chat-container').style.display = 'block';
+        return false;
+      };
+
+      // Handle form submission to send message
+      document.getElementById('message-form').onsubmit = function() {
+        var message = document.getElementById('message-input').value;
+        socket.emit('message', {username: username, message: message});
+        document.getElementById('message-input').value = '';
+        return false;
+      };
+
+      // Handle incoming messages
+      socket.on('message', function(data) {
+        var message = document.createElement('li');
+        message.innerHTML = '<b>' + data.username + ':</b> ' + data.message;
+        document.getElementById('messages').appendChild(message);
+      });
+    </script>
+  </body>
+</html>
